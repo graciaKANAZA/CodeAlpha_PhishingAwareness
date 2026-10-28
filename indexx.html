@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phishing : apprenez à repérer le piège</title>
+<style>
+:root{--bg:#eef1f5;--ink:#12202e;--mute:#546577;--card:#fff;--line:#d3dae3;--red:#c62828;--redbg:#fdecea;--green:#17744a;--greenbg:#e6f4ec;--blue:#2457d6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 "Segoe UI",system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:0 20px 80px}
+h1{font:700 clamp(2rem,6vw,3.2rem)/1.1 Georgia,serif;margin:48px 0 12px}
+h2{font:700 1.7rem/1.2 Georgia,serif;margin:56px 0 8px}
+p{margin:.4em 0 1em;max-width:68ch}
+.lead{color:var(--mute);font-size:1.1rem}
+.mail{background:var(--card);border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:24px 0}
+.mail header{background:#f6f8fb;padding:14px 18px;border-bottom:1px solid var(--line);font:14px/1.7 ui-monospace,Menlo,Consolas,monospace}
+.mail .body{padding:18px}
+.hot{all:unset;cursor:pointer;border-bottom:2px dashed var(--blue);color:inherit}
+.hot:hover,.hot:focus-visible{background:#e3ebff;outline:2px solid var(--blue);outline-offset:2px}
+.hot.found{border-bottom:2px solid var(--red);background:var(--redbg)}
+.btnfake{display:inline-block;background:#0a6ed1;color:#fff;padding:10px 18px;border-radius:4px;margin:6px 0}
+#explain{min-height:64px;border-left:4px solid var(--blue);background:var(--card);padding:12px 16px;margin:12px 0}
+#score{font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:16px 0}
+.box{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.box h3{margin:0 0 4px;font-size:1.05rem}
+.box p{margin:0;font-size:.95rem;color:var(--mute)}
+.url{font:15px ui-monospace,Menlo,Consolas,monospace;padding:8px 12px;border-radius:4px;margin:6px 0;display:flex;gap:10px;flex-wrap:wrap}
+.url.bad{background:var(--redbg);color:var(--red)}.url.ok{background:var(--greenbg);color:var(--green)}
+.case{border-top:1px solid var(--line);padding:14px 0}.case b{font-family:Georgia,serif;font-size:1.1rem}
+ul.tips{padding-left:1.2em}ul.tips li{margin:.5em 0}
+.q{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin:14px 0}
+.q p.t{font-weight:600;margin-top:0}
+.q button.opt{display:block;width:100%;text-align:left;font:inherit;background:#f6f8fb;border:1px solid var(--line);border-radius:4px;padding:9px 12px;margin:6px 0;cursor:pointer}
+.q button.opt:hover:not(:disabled),.q button.opt:focus-visible{border-color:var(--blue);outline:2px solid var(--blue)}
+.q button.opt.good{background:var(--greenbg);border-color:var(--green)}.q button.opt.bad{background:var(--redbg);border-color:var(--red)}
+.fb{font-size:.95rem;margin:8px 0 0;color:var(--mute)}
+#result{font-size:1.2rem;font-weight:700;margin-top:20px}
+footer{color:var(--mute);font-size:.9rem;margin-top:60px}
+@media(prefers-reduced-motion:no-preference){.hot{transition:background .15s}}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Cet e-mail est-il un piège ?</h1>
+<p class="lead">Le phishing (hameçonnage) consiste à se faire passer pour une entité de confiance afin de voler des identifiants, de l'argent ou d'installer un logiciel malveillant. Commencez par inspecter le message ci-dessous : cliquez sur les 4 éléments soulignés qui doivent vous alerter.</p>
+
+<div class="mail" aria-label="Exemple d'e-mail frauduleux">
+<header>
+De : <button class="hot" data-i="0">Support Microsoft &lt;security@micr0soft-support.net&gt;</button><br>
+À : vous@entreprise.com<br>
+Objet : <button class="hot" data-i="1">URGENT : votre compte sera suspendu dans 24 h</button>
+</header>
+<div class="body">
+<p>Cher client,</p>
+<p>Nous avons détecté une activité inhabituelle. Vérifiez votre identité maintenant, sinon votre boîte mail sera définitivement supprimée.</p>
+<p><button class="hot" data-i="2"><span class="btnfake">Vérifier mon compte</span></button><br><small>Le lien pointe vers : http://login-m1crosoft.secure-check.ru/verify</small></p>
+<p>Détails de l'incident en pièce jointe : <button class="hot" data-i="3">rapport_securite.pdf.exe</button></p>
+</div>
+</div>
+<div id="explain" aria-live="polite">Cliquez sur un élément souligné pour voir pourquoi il est suspect.</div>
+<p>Signaux trouvés : <span id="score">0 / 4</span></p>
+
+<h2>Reconnaître un e-mail de phishing</h2>
+<div class="grid">
+<div class="box"><h3>Expéditeur</h3><p>Le nom affiché peut être falsifié : regardez l'adresse réelle et son domaine, pas seulement le nom.</p></div>
+<div class="box"><h3>Ton du message</h3><p>Urgence, menace, récompense inattendue ou demande de confidentialité : l'objectif est de vous empêcher de réfléchir.</p></div>
+<div class="box"><h3>Liens</h3><p>Survolez sans cliquer pour lire l'adresse réelle. Une banque ne demande jamais vos identifiants par lien.</p></div>
+<div class="box"><h3>Pièces jointes</h3><p>Méfiez-vous des fichiers inattendus, surtout .exe, .scr, .js, ou des documents Office demandant d'activer les macros.</p></div>
+<div class="box"><h3>Forme</h3><p>Salutation générique (« Cher client »), fautes inhabituelles, logo flou. Les attaques récentes soignent pourtant la forme : ne vous fiez pas qu'à elle.</p></div>
+</div>
+
+<h2>Reconnaître un faux site</h2>
+<p>Lisez le domaine de droite à gauche : c'est ce qui précède le premier « / » qui compte, et la fin du domaine (avant l'extension) désigne le vrai propriétaire.</p>
+<div class="url ok">✔ <span>https://login.microsoftonline.com/</span></div>
+<div class="url bad">✘ <span>https://login-m1crosoft.secure-check.ru/</span> <small>chiffre « 1 » à la place du « i », vrai domaine : secure-check.ru</small></div>
+<div class="url bad">✘ <span>https://microsoft.com.compte-verif.info/</span> <small>vrai domaine : compte-verif.info</small></div>
+<p>Le cadenas HTTPS prouve seulement que la connexion est chiffrée, pas que le site est honnête : les sites frauduleux en ont aussi.</p>
+
+<h2>Les leviers de l'ingénierie sociale</h2>
+<div class="grid">
+<div class="box"><h3>Urgence</h3><p>« Dans 24 h », « immédiatement » : la pression empêche la vérification.</p></div>
+<div class="box"><h3>Autorité</h3><p>Faux directeur, faux support, faux service des impôts : on obéit plus vite à une figure d'autorité.</p></div>
+<div class="box"><h3>Peur</h3><p>Compte piraté, amende, colis bloqué : la crainte pousse à cliquer.</p></div>
+<div class="box"><h3>Curiosité et gain</h3><p>Gain à un concours, photo « compromettante », remboursement inattendu.</p></div>
+<div class="box"><h3>Confiance</h3><p>Message qui semble venir d'un collègue ou d'un fournisseur connu, parfois après le piratage de sa vraie boîte mail.</p></div>
+</div>
+<p>Variantes à connaître : <b>spear phishing</b> (message ciblé et personnalisé), <b>smishing</b> (par SMS), <b>vishing</b> (par téléphone), <b>BEC</b> (faux e-mail de dirigeant ou de fournisseur pour obtenir un virement).</p>
+
+<h2>Cas réels</h2>
+<div class="case"><b>Fausses factures (2013 à 2015)</b><p>Un fraudeur a envoyé de fausses factures au nom d'un fournisseur matériel réel à Google et à Facebook, qui ont versé plus de 100 millions de dollars avant la détection. Leçon : vérifier tout changement de coordonnées bancaires par un second canal.</p></div>
+<div class="case"><b>Twitter (juillet 2020)</b><p>Des employés ont été manipulés par téléphone (vishing) pour donner accès à des outils internes, ce qui a permis de prendre le contrôle de comptes très suivis. Leçon : l'ingénierie sociale vise aussi les personnes bien formées, d'où l'importance de procédures de vérification.</p></div>
+<div class="case"><b>RSA (2011)</b><p>Un simple e-mail avec un fichier Excel piégé, envoyé à quelques employés, a servi de point d'entrée à une intrusion dans cette entreprise de sécurité. Leçon : un seul clic peut suffire.</p></div>
+
+<h2>Bonnes pratiques</h2>
+<ul class="tips">
+<li>Ne cliquez pas : ouvrez le site officiel vous-même (favori ou saisie de l'adresse).</li>
+<li>Activez l'authentification multifacteur partout, de préférence avec une clé ou une application plutôt que le SMS.</li>
+<li>Utilisez un gestionnaire de mots de passe : il ne remplit pas les identifiants sur un faux domaine, ce qui est un signal d'alerte.</li>
+<li>Vérifiez toute demande sensible (virement, mot de passe, données) par un autre canal, en appelant un numéro que vous connaissez déjà.</li>
+<li>Tenez système, navigateur et antivirus à jour.</li>
+<li>Signalez le message à votre service informatique ou à signal-spam.fr (France), puis supprimez-le. Si vous avez cliqué ou saisi un mot de passe : changez-le immédiatement et prévenez le support.</li>
+</ul>
+
+<h2>Testez-vous</h2>
+<div id="quiz"></div>
+<div id="result" aria-live="polite"></div>
+
+</main>
+
+<script>
+var flags=[
+"Adresse suspecte : « micr0soft » avec un zéro, et un domaine .net sans rapport avec Microsoft. Le nom affiché peut être faux, vérifiez toujours l'adresse.",
+"Fausse urgence et menace de suspension : technique classique pour empêcher la réflexion.",
+"Le lien mène à « login-m1crosoft.secure-check.ru » : domaine imitant Microsoft, vrai propriétaire secure-check.ru. Survolez toujours avant de cliquer.",
+"Double extension « .pdf.exe » : c'est un programme déguisé en PDF. Ne l'ouvrez jamais."
+];
+var found={};
+document.querySelectorAll('.hot').forEach(function(b){
+ b.addEventListener('click',function(){
+  var i=b.dataset.i;found[i]=1;b.classList.add('found');
+  document.getElementById('explain').textContent=flags[i];
+  var n=Object.keys(found).length;
+  document.getElementById('score').textContent=n+' / 4'+(n==4?' (bravo, tous trouvés)':'');
+ });
+});
+
+var Q=[
+{q:"Un message de votre banque vous demande de confirmer votre mot de passe via un lien. Que faites-vous ?",o:["Je clique et je me connecte vite","Je n'utilise pas le lien : j'ouvre le site officiel moi-même","Je réponds au message en demandant si c'est sérieux"],a:1,f:"Une banque ne demande jamais vos identifiants par e-mail. Passez par le site ou l'appli officiels."},
+{q:"Quelle adresse est la plus probablement légitime ?",o:["https://paypal.com.verif-compte.info/","https://www.paypal.com/","https://paypa1.com/"],a:1,f:"Le vrai domaine est ce qui précède le premier « / » : ici « paypal.com ». Les autres imitent la marque."},
+{q:"Le cadenas HTTPS dans la barre d'adresse garantit que le site est honnête.",o:["Vrai","Faux"],a:1,f:"Il garantit seulement que la connexion est chiffrée. Les sites de phishing utilisent aussi HTTPS."},
+{q:"Un collègue (ou votre directeur) vous écrit d'urgence pour un virement confidentiel. Premier réflexe ?",o:["Faire le virement pour ne pas le décevoir","Le joindre par un autre canal (appel, messagerie interne) pour confirmer","Transférer le message à toute l'équipe"],a:1,f:"C'est le schéma du BEC. Vérifiez par un canal indépendant avant tout paiement."},
+{q:"Vous avez cliqué sur un lien suspect et saisi votre mot de passe. Que faire ?",o:["Rien, ça va sûrement aller","Changer le mot de passe tout de suite, activer le MFA et prévenir le support","Attendre pour voir si quelque chose se passe"],a:1,f:"Chaque minute compte : changez le mot de passe (et ceux réutilisés ailleurs), activez le MFA et prévenez le support."},
+{q:"Parmi ces pièces jointes, laquelle est la plus dangereuse ?",o:["facture_mars.pdf","photo_vacances.jpg","facture_mars.pdf.exe"],a:2,f:"Un fichier .exe est un programme. La double extension sert à le faire passer pour un document."}
+];
+var score=0,done=0,box=document.getElementById('quiz');
+Q.forEach(function(x,k){
+ var d=document.createElement('div');d.className='q';
+ var h='<p class="t">'+(k+1)+'. '+x.q+'</p>';
+ x.o.forEach(function(o,j){h+='<button class="opt" data-j="'+j+'">'+o+'</button>'});
+ h+='<p class="fb" aria-live="polite"></p>';d.innerHTML=h;box.appendChild(d);
+ d.querySelectorAll('.opt').forEach(function(b){
+  b.addEventListener('click',function(){
+   var j=+b.dataset.j,ok=j===x.a;
+   d.querySelectorAll('.opt').forEach(function(c,i){c.disabled=true;if(i===x.a)c.classList.add('good')});
+   if(!ok)b.classList.add('bad');
+   d.querySelector('.fb').textContent=(ok?'Correct. ':'Pas tout à fait. ')+x.f;
+   if(ok)score++;done++;
+   if(done===Q.length){
+    var m=score===Q.length?"Parfait, vous repérez bien les pièges.":score>=4?"Très bien, relisez les points manqués.":"Relisez les sections ci-dessus puis recommencez.";
+    document.getElementById('result').textContent="Score : "+score+" / "+Q.length+". "+m;
+   }
+  });
+ });
+});
+</script>
+</body>
+</html>
